@@ -1,4 +1,4 @@
-const ping = require("ping");
+const dns = require("dns").promises;
 const NetworkCheck = require("../models/NetworkCheck");
 
 // Check Network Connection
@@ -13,13 +13,17 @@ exports.checkConnection = async (req, res) => {
             });
         }
 
-        const result = await ping.promise.probe(hostname);
+        const startTime = Date.now();
+
+        const result = await dns.lookup(hostname);
+
+        const responseTime = Date.now() - startTime;
 
         const newCheck = new NetworkCheck({
             hostname,
-            ipAddress: result.numeric_host,
-            status: result.alive ? "Online" : "Offline",
-            responseTime: Number(result.time)
+            ipAddress: result.address,
+            status: "Online",
+            responseTime
         });
 
         await newCheck.save();
@@ -27,18 +31,36 @@ exports.checkConnection = async (req, res) => {
         res.json({
             success: true,
             hostname,
-            alive: result.alive,
-            ip: result.numeric_host,
-            time: result.time
+            alive: true,
+            ip: result.address,
+            time: responseTime
         });
 
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
+
+        try {
+            const newCheck = new NetworkCheck({
+                hostname: req.body.hostname,
+                ipAddress: "N/A",
+                status: "Offline",
+                responseTime: 0
+            });
+
+            await newCheck.save();
+        } catch (err) {
+            console.log(err);
+        }
+
+        res.json({
+            success: true,
+            hostname: req.body.hostname,
+            alive: false,
+            ip: "N/A",
+            time: 0
         });
     }
 };
+
 // Get All Network Checks
 exports.getAllChecks = async (req, res) => {
     try {
