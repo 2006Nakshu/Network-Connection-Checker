@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+const API_URL = "https://network-connection-checker-backend.onrender.com/api/network";
 function App() {
   const [hostname, setHostname] = useState("");
   const [message, setMessage] = useState("");
@@ -10,9 +10,7 @@ function App() {
   // Load all saved history
   const loadHistory = async () => {
     try {
-      const response = await axios.get(
-        "http://127.0.0.1:5000/api/network"
-      );
+      const response = await axios.get(API_URL);
 
       setHistory(response.data);
       setAllHistory(response.data);
@@ -45,12 +43,9 @@ if (!hostnameRegex.test(hostname)) {
 
     try {
       setState("Checking");
-      const response = await axios.post(
-        "http://127.0.0.1:5000/api/network/check",
-        {
-          hostname,
-        }
-      );
+      const response = await axios.post(API_URL, {
+  hostname,
+});
 
       const data = response.data;
 
@@ -85,10 +80,7 @@ if (data.alive) {
   // Delete Record
   const deleteRecord = async (id) => {
     try {
-      await axios.delete(
-        `http://127.0.0.1:5000/api/network/${id}`
-      );
-
+      await axios.delete(`${API_URL}/${id}`);
       loadHistory();
 
     } catch (error) {
