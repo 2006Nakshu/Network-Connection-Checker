@@ -43,7 +43,7 @@ if (!hostnameRegex.test(hostname)) {
 
     try {
       setState("Checking");
-      const response = await axios.post(API_URL, {
+      const response = await axios.post(`${API_URL}/check`, {
   hostname,
 });
 
