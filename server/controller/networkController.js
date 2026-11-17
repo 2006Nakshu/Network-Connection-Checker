@@ -39,7 +39,6 @@ exports.checkConnection = async (req, res) => {
         });
     }
 };
-
 // Get All Network Checks
 exports.getAllChecks = async (req, res) => {
     try {
